@@ -2,8 +2,10 @@ import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import { LucideBookOpen } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-green-100 to-blue-100">
       <div className="bg-white rounded-lg shadow-lg max-w-sm w-full overflow-hidden">
@@ -22,7 +24,10 @@ const Login = () => {
             <FeatureItem text="Easy-to-use Interface" />
           </div>
 
-          <button className="w-full bg-teal-600 text-white py-3 rounded-lg font-semibold hover:bg-teal-700 hover:scale-105 transition ease-in-out duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-teal-500">
+          <button
+            onClick={() => navigate("/homepage")}
+            className="w-full bg-teal-600 text-white py-3 rounded-lg font-semibold hover:bg-teal-700 hover:scale-105 transition ease-in-out duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-teal-500"
+          >
             Login with Canvas
             <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
           </button>
