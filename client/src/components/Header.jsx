@@ -11,7 +11,7 @@ const Header = () => (
       <Link to="/">
         <button className="flex items-center space-x-2 bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700 transition duration-300 ease-in-out">
           <LogOut size={18} />
-          <span onClick={() => Navigate("/")}>Sign Out</span>
+          <span>Sign Out</span>
         </button>
       </Link>
     </div>
