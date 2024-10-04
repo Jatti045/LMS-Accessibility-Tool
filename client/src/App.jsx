@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Toaster } from "./components/ui/toaster";
 import { Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
+import LoginPage from "./pages/LoginSignupPage";
 import Homepage from "./pages/Homepage";
 import { auth } from "./components/firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, clearUser } from "./components/app/features/userSlice";
-import { Home, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 function App() {
   const dispatch = useDispatch();

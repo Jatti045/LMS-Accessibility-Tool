@@ -5,15 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useDispatch } from "react-redux";
+import { setUser } from "./app/features/userSlice";
+import { useNavigate } from "react-router-dom";
 import { auth } from "./firebase";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   updateProfile,
 } from "firebase/auth";
-import { useDispatch } from "react-redux";
-import { setUser } from "./app/features/userSlice";
-import { useNavigate } from "react-router-dom";
 
 const LoginSignup = () => {
   const navigate = useNavigate();
@@ -39,15 +39,17 @@ const LoginSignup = () => {
         })
       );
       toast({
-        description: "Login Successful!",
+        description: "Welcome back! You have successfully logged in.",
         duration: 3000,
       });
       navigate("/homepage");
     } catch (error) {
       console.error("Login error:", error.message);
       toast({
-        description: "There was a problem. Please try again.",
+        description:
+          "Login failed. Please check your credentials and try again.",
         duration: 3000,
+        variant: "destructive",
       });
     }
   };
@@ -55,6 +57,8 @@ const LoginSignup = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
+      if (signupName === "")
+        throw new Error("Display name cannot be empty. Please provide a name.");
       const userCredentials = await createUserWithEmailAndPassword(
         auth,
         signupEmail,
@@ -63,22 +67,36 @@ const LoginSignup = () => {
       await updateProfile(userCredentials.user, {
         displayName: signupName,
       });
-      // Dispatch the user data to Redux store
       dispatch(
         setUser({
           displayName: signupName,
         })
       );
       toast({
-        description: "Signup Successful!",
+        description: "Account created successfully! Welcome aboard.",
         duration: 3000,
       });
       navigate("/homepage");
     } catch (error) {
-      console.error("Signup error:", error.message);
+      let errorMessage = error.message || "Signup failed. Please try again.";
+
+      if (error.code === "auth/invalid-email") {
+        errorMessage =
+          "Invalid email format. Please enter a valid email address.";
+      } else if (
+        error.code === "auth/weak-password" ||
+        error.code === "auth/missing-password"
+      ) {
+        errorMessage = "Password should be at least 6 characters long.";
+      } else if (error.code === "auth/email-already-in-use") {
+        errorMessage =
+          "The email is already in use. Please use a different email or login.";
+      }
+
       toast({
-        description: "Signup failed. Please try again.",
+        description: errorMessage,
         duration: 3000,
+        variant: "destructive",
       });
     }
   };
