@@ -1,13 +1,52 @@
-import { Routes, Route } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Toaster } from "./components/ui/toaster";
+import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import Homepage from "./pages/Homepage";
+import { auth } from "./components/firebase";
+import { useDispatch, useSelector } from "react-redux";
+import { setUser, clearUser } from "./components/app/features/userSlice";
+import { Home, Loader2 } from "lucide-react";
 
 function App() {
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true);
+  const user = useSelector((state) => state.user.user);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        dispatch(
+          setUser({
+            email: user.email,
+            displayName: user.displayName,
+          })
+        );
+      } else {
+        dispatch(clearUser());
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [dispatch]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center min-h-screen items-center">
+        <Loader2 className="animate-spin size-20 text-teal-200"></Loader2>
+      </div>
+    );
+  }
+
   return (
-    <Routes>
-      <Route path="/" element={<LoginPage />} />
-      <Route path="/homepage" element={<Homepage />} />
-    </Routes>
+    <>
+      <Toaster />
+      <Routes>
+        <Route path="/" element={user ? <Homepage /> : <LoginPage />} />
+        <Route path="/homepage" element={user ? <Homepage /> : <LoginPage />} />
+      </Routes>
+    </>
   );
 }
 

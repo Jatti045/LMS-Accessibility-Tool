@@ -1,6 +1,12 @@
+import React from "react";
 import { Upload } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const FileUpload = () => {
+  const userDisplayName = useSelector(
+    (state) => state.user.user?.displayName || "User"
+  );
+
   const handleFileUpload = (event) => {
     console.log("File uploaded:", event.target.files[0]);
   };
@@ -8,7 +14,7 @@ const FileUpload = () => {
   return (
     <section className="bg-white rounded-lg shadow-lg p-6 mb-8">
       <h2 className="text-xl font-semibold text-teal-900 mb-4">
-        Upload New File
+        Hello {userDisplayName}
       </h2>
       <div className="flex items-center justify-center w-full">
         <label

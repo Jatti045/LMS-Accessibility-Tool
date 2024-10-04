@@ -1,16 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { LucideBookOpen, Mail, Lock, User } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 import { auth } from "./firebase";
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
+import { useDispatch } from "react-redux";
+import { setUser } from "./app/features/userSlice";
+import { useNavigate } from "react-router-dom";
 
 const LoginSignup = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { toast } = useToast();
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
@@ -20,20 +28,58 @@ const LoginSignup = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
-      console.log("Login successful!");
+      const userCredentials = await signInWithEmailAndPassword(
+        auth,
+        loginEmail,
+        loginPassword
+      );
+      dispatch(
+        setUser({
+          displayName: userCredentials.user.displayName,
+        })
+      );
+      toast({
+        description: "Login Successful!",
+        duration: 3000,
+      });
+      navigate("/homepage");
     } catch (error) {
       console.error("Login error:", error.message);
+      toast({
+        description: "There was a problem. Please try again.",
+        duration: 3000,
+      });
     }
   };
 
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      await createUserWithEmailAndPassword(auth, signupEmail, signupPassword);
-      console.log("Signup successful!");
+      const userCredentials = await createUserWithEmailAndPassword(
+        auth,
+        signupEmail,
+        signupPassword
+      );
+      await updateProfile(userCredentials.user, {
+        displayName: signupName,
+      });
+      // Dispatch the user data to Redux store
+      dispatch(
+        setUser({
+          displayName: signupName,
+        })
+      );
+      toast({
+        description: "Signup Successful!",
+        duration: 3000,
+      });
+      navigate("/homepage");
     } catch (error) {
       console.error("Signup error:", error.message);
+      toast({
+        description: "Signup failed. Please try again.",
+        duration: 3000,
+      });
     }
   };
 
