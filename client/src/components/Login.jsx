@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { LucideBookOpen, Mail, Lock, User } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -12,7 +11,6 @@ import {
 } from "firebase/auth";
 
 const LoginSignup = () => {
-  const history = useNavigate("");
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
@@ -24,7 +22,6 @@ const LoginSignup = () => {
     try {
       await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
       console.log("Login successful!");
-      navigate("/homepage");
     } catch (error) {
       console.error("Login error:", error.message);
     }
