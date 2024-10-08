@@ -3,6 +3,7 @@ import { Toaster } from "./components/ui/toaster";
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginSignupPage";
 import Homepage from "./pages/Homepage";
+import DocumentListPage from "./pages/DocumentListPage"; // Import the new component
 import { auth } from "./components/firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, clearUser } from "./components/app/features/userSlice";
@@ -45,6 +46,10 @@ function App() {
       <Routes>
         <Route path="/" element={user ? <Homepage /> : <LoginPage />} />
         <Route path="/homepage" element={user ? <Homepage /> : <LoginPage />} />
+        <Route 
+          path="/document-list" 
+          element={user ? <DocumentListPage /> : <Navigate to="/" replace />} 
+        />
       </Routes>
     </>
   );
