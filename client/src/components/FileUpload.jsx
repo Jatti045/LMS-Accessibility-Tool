@@ -284,7 +284,7 @@ const FileUpload = () => {
                             )
                           </p>
                         </div>
-                        <ChevronRight className="text-teal-500" />
+                        <ChevronRight className="text-teal-500 cursor-pointer" />
                       </div>
                     </CardContent>
                   </Card>

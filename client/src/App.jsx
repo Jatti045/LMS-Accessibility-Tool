@@ -46,9 +46,9 @@ function App() {
       <Routes>
         <Route path="/" element={user ? <Homepage /> : <LoginPage />} />
         <Route path="/homepage" element={user ? <Homepage /> : <LoginPage />} />
-        <Route 
-          path="/document-list" 
-          element={user ? <DocumentListPage /> : <Navigate to="/" replace />} 
+        <Route
+          path="/document-list"
+          element={user ? <DocumentListPage /> : <Homepage />}
         />
       </Routes>
     </>
