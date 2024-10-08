@@ -1,29 +1,40 @@
 import React, { useState } from "react";
-import { Upload } from "lucide-react";
+import {
+  Upload,
+  FileText,
+  AlertTriangle,
+  ChevronRight,
+  Calendar,
+} from "lucide-react";
 import { useSelector } from "react-redux";
 import Papa from "papaparse";
-import { FileText, AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button"; 
-import { useToast } from "@/hooks/use-toast"; 
-import { useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 const FileUpload = () => {
   const [csvFiles, setCsvFiles] = useState([]);
-  const [currentFileData, setCurrentFileData] = useState(null); // State to store current file data
-  const [currentFileName, setCurrentFileName] = useState(""); // State to store the current file name
+  const [currentFileData, setCurrentFileData] = useState(null);
+  const [currentFileName, setCurrentFileName] = useState("");
   const userDisplayName = useSelector(
     (state) => state.user.user?.displayName || "User"
   );
+  const navigate = useNavigate();
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
-
     if (file && file.type === "text/csv") {
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target.result;
         parseCSV(text);
-        setCurrentFileName(file.name); // Store the current file name
+        setCurrentFileName(file.name);
       };
       reader.readAsText(file);
     } else {
@@ -39,15 +50,15 @@ const FileUpload = () => {
         const criticalIssuesCount = calculateCriticalIssues(results.data);
         const overallScoreCount = calculateOverallScore(results.data);
 
-        // Save the current file data
         const newFileData = {
           totalIssues: totalIssuesCount,
           criticalIssues: criticalIssuesCount,
           overallScore: overallScoreCount.toFixed(1),
+          date: new Date().toLocaleDateString(),
         };
 
-        setCsvFiles([...csvFiles, newFileData]);
-        setCurrentFileData(newFileData); // Store the current file data
+        setCsvFiles([newFileData, ...csvFiles]);
+        setCurrentFileData(newFileData);
       },
     });
   };
@@ -103,50 +114,45 @@ const FileUpload = () => {
     return count > 0 ? (totalScore / count) * 100 : 0;
   };
 
-  // Function to handle the "Fix All Issues" button click
-  const navigate = useNavigate();
-
   const handleFixAllIssues = () => {
     console.log("Fixing all issues...");
-    navigate('/document-list', { state: { csvData: parseCSV} });
-    // Implement your logic for fixing all issues here
+    navigate("/document-list", { state: { csvData: currentFileData } });
   };
 
-  // Function to handle the "Fix Only Critical Issues" button click
   const handleFixCriticalIssues = () => {
     console.log("Fixing only critical issues...");
     // Implement your logic for fixing critical issues here
   };
 
-  // Function to handle uploading another file
   const handleUploadAnotherFile = () => {
-    setCurrentFileData(null); // Reset the current file data
-    // Retain the current file name for history display
+    setCurrentFileData(null);
   };
 
   return (
-    <section>
-      <section className="bg-white rounded-lg shadow-lg p-6 mb-8">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-teal-900 mb-4">
-            Hello {userDisplayName}
-          </h2>
-          <Button 
-            onClick={handleUploadAnotherFile} 
-            className="bg-teal-500 text-white"
-          >
-            Upload Another File
-          </Button>
-        </div>
-        
-        {!currentFileData ? ( // Conditionally render the upload section
-          <div className="flex items-center justify-center w-full">
+    <div className="max-w-4xl mx-auto p-6 space-y-8">
+      <Card className="bg-gradient-to-br from-teal-500 to-teal-600 text-white">
+        <CardHeader>
+          <h2 className="text-2xl font-bold">Welcome, {userDisplayName}</h2>
+        </CardHeader>
+        <CardContent>
+          <p className="text-teal-100">
+            Upload and analyze your CSV files for accessibility issues.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <h2 className="text-xl font-semibold text-teal-900">File Upload</h2>
+        </CardHeader>
+        <CardContent>
+          {!currentFileData ? (
             <label
               htmlFor="file-upload"
               className="flex flex-col items-center justify-center w-full h-64 border-2 border-teal-300 border-dashed rounded-lg cursor-pointer bg-teal-50 hover:bg-teal-100 transition duration-300 ease-in-out"
             >
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <Upload className="w-10 h-10 text-teal-500 mb-3" />
+                <Upload className="w-12 h-12 text-teal-500 mb-3" />
                 <p className="mb-2 text-sm text-teal-700">
                   <span className="font-semibold">Click to upload</span> or drag
                   and drop
@@ -163,60 +169,136 @@ const FileUpload = () => {
                 onChange={handleFileUpload}
               />
             </label>
-          </div>
-        ) : ( // Render issue summary after file upload
-          <div className="bg-teal-50 p-4 rounded-lg">
-            <h3 className="font-medium text-teal-900">Upload Summary: {currentFileName}</h3>
-            <div className="flex flex-col items-center text-sm text-teal-600">
-              <span className="font-bold text-2xl">Total Issues: {currentFileData.totalIssues}</span> {/* Increased font size */}
-              <div className="flex flex-col items-center mt-2">
-                <Button onClick={handleFixAllIssues} className="bg-teal-500 text-white mb-2">
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center space-x-4">
+                <FileText className="text-teal-700" size={40} />
+                <div>
+                  <h3 className="font-medium text-teal-900">
+                    {currentFileName}
+                  </h3>
+                  <p className="text-sm text-teal-600">
+                    Uploaded on {currentFileData.date}
+                  </p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-teal-700">
+                    Overall Score
+                  </span>
+                  <span className="text-sm font-bold text-teal-900">
+                    {currentFileData.overallScore}%
+                  </span>
+                </div>
+                <Progress
+                  value={parseFloat(currentFileData.overallScore)}
+                  className="h-2"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="bg-teal-50">
+                  <CardContent className="p-4">
+                    <h4 className="font-medium text-teal-900 mb-2">
+                      Total Issues
+                    </h4>
+                    <p className="text-3xl font-bold text-teal-700">
+                      {currentFileData.totalIssues}
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-red-50">
+                  <CardContent className="p-4">
+                    <h4 className="font-medium text-red-900 mb-2">
+                      Critical Issues
+                    </h4>
+                    <p className="text-3xl font-bold text-red-700">
+                      {currentFileData.criticalIssues}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="flex space-x-4">
+                <Button
+                  onClick={handleFixAllIssues}
+                  className="flex-1 bg-teal-500 hover:bg-teal-600"
+                >
                   Fix All Issues
                 </Button>
-              </div>
-              <div className="flex flex-col items-center mt-4">
-                <AlertTriangle size={24} className="text-orange-500" />
-                <span className="font-bold text-2xl">Critical Issues: {currentFileData.criticalIssues}</span> {/* Increased font size */}
-                <Button onClick={handleFixCriticalIssues} className="bg-red-500 text-white mb-2">
-                  Fix Only Critical Issues
+                <Button
+                  onClick={handleFixCriticalIssues}
+                  className="flex-1 bg-red-500 hover:bg-red-600"
+                >
+                  Fix Critical Issues
                 </Button>
               </div>
             </div>
-          </div>
-        )}
-      </section>
-
-      {/* Upload History */}
-      <section className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-xl font-semibold text-teal-900 mb-4">
-          Upload History
-        </h2>
-        <div className="space-y-4">
-          {csvFiles.length > 0 ? csvFiles.map((csvFile, index) => (
-            <div key={index} className="bg-teal-50 p-4 rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <FileText className="text-teal-700" size={20} />
-                  <span className="font-medium text-teal-900">{currentFileName}</span> {/* Displaying the document name */}
-                </div>
-                <span className="text-sm font-medium text-teal-700">
-                  Score: {csvFile.overallScore}%
-                </span>
-              </div>
-              <div className="flex items-center justify-between text-sm text-teal-600">
-                <span className="font-bold">Total Issues: {csvFile.totalIssues}</span>
-                <div className="flex items-center space-x-1">
-                  <AlertTriangle size={16} className="text-orange-500" />
-                  <span className="font-bold">Critical Issues: {csvFile.criticalIssues}</span>
-                </div>
-              </div>
-            </div>
-          )) : (
-            <p className="text-center text-teal-600">No upload history available.</p>
           )}
-        </div>
-      </section>
-    </section>
+        </CardContent>
+        <CardFooter>
+          <Button
+            onClick={handleUploadAnotherFile}
+            variant="outline"
+            className="w-full"
+          >
+            Upload Another File
+          </Button>
+        </CardFooter>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <h2 className="text-xl font-semibold text-teal-900">
+            Upload History
+          </h2>
+        </CardHeader>
+        <CardContent>
+          {csvFiles.length > 0 ? (
+            <ul className="space-y-4">
+              {csvFiles.map((csvFile, index) => (
+                <li key={index}>
+                  <Card className="bg-teal-50 hover:bg-teal-100 transition-colors">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <FileText className="text-teal-700" size={24} />
+                          <div>
+                            <h3 className="font-medium text-teal-900">
+                              {currentFileName.slice(0, 20)}
+                            </h3>
+                            <p className="text-sm text-teal-600 flex items-center">
+                              <Calendar size={14} className="mr-1" />
+                              {csvFile.date}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-medium text-teal-700">
+                            Score: {csvFile.overallScore}%
+                          </p>
+                          <p className="text-sm text-teal-600">
+                            Issues: {csvFile.totalIssues} (
+                            <span className="text-red-500">
+                              {csvFile.criticalIssues} critical
+                            </span>
+                            )
+                          </p>
+                        </div>
+                        <ChevronRight className="text-teal-500" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-center text-teal-600">
+              No upload history available.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
