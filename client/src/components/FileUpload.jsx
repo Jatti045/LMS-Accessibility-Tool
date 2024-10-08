@@ -26,6 +26,7 @@ const FileUpload = () => {
     (state) => state.user.user?.displayName || "User"
   );
   const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
