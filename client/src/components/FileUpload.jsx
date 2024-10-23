@@ -1,11 +1,5 @@
-import React, { useState } from "react";
-import {
-  Upload,
-  FileText,
-  AlertTriangle,
-  ChevronRight,
-  Calendar,
-} from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Upload, FileText, ChevronRight, Calendar, X } from "lucide-react";
 import { useSelector } from "react-redux";
 import Papa from "papaparse";
 import { Button } from "@/components/ui/button";
@@ -17,8 +11,19 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { db, auth } from "./firebase"; // Import Firebase config
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 
 const FileUpload = () => {
+  const [uploads, setUploads] = useState([]);
   const [csvFiles, setCsvFiles] = useState([]);
   const [currentFileData, setCurrentFileData] = useState(null);
   const [currentFileName, setCurrentFileName] = useState("");
@@ -26,15 +31,38 @@ const FileUpload = () => {
     (state) => state.user.user?.displayName || "User"
   );
   const navigate = useNavigate();
+  const user = auth.currentUser;
+
+  useEffect(() => {
+    const fetchUploadHistory = async () => {
+      if (user) {
+        const userId = user.uid;
+
+        const q = query(
+          collection(db, "userUploads"),
+          where("userId", "==", userId)
+        );
+        const querySnapshot = await getDocs(q);
+
+        const uploadList = [];
+        querySnapshot.forEach((doc) => {
+          uploadList.push({ id: doc.id, ...doc.data() });
+        });
+        setCsvFiles(uploadList);
+      }
+    };
+
+    fetchUploadHistory();
+  }, [user]);
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file && file.type === "text/csv") {
+      setCurrentFileName(file.name);
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target.result;
         parseCSV(text);
-        setCurrentFileName(file.name);
       };
       reader.readAsText(file);
     } else {
@@ -45,7 +73,7 @@ const FileUpload = () => {
   const parseCSV = (text) => {
     Papa.parse(text, {
       header: true,
-      complete: (results) => {
+      complete: async (results) => {
         const totalIssuesCount = calculateTotalIssues(results.data);
         const criticalIssuesCount = calculateCriticalIssues(results.data);
         const overallScoreCount = calculateOverallScore(results.data);
@@ -55,10 +83,20 @@ const FileUpload = () => {
           criticalIssues: criticalIssuesCount,
           overallScore: overallScoreCount.toFixed(1),
           date: new Date().toLocaleDateString(),
+          fileName: currentFileName,
+          userId: user.uid,
         };
 
-        setCsvFiles([newFileData, ...csvFiles]);
-        setCurrentFileData(newFileData);
+        try {
+          const docRef = await addDoc(
+            collection(db, "userUploads"),
+            newFileData
+          );
+          setCsvFiles([{ id: docRef.id, ...newFileData }, ...csvFiles]);
+          setCurrentFileData(newFileData);
+        } catch (e) {
+          console.error("Error adding document: ", e);
+        }
       },
     });
   };
@@ -121,11 +159,20 @@ const FileUpload = () => {
 
   const handleFixCriticalIssues = () => {
     console.log("Fixing only critical issues...");
-    // Implement your logic for fixing critical issues here
   };
 
   const handleUploadAnotherFile = () => {
     setCurrentFileData(null);
+  };
+
+  const handleDeleteFile = async (fileId) => {
+    console.log;
+    try {
+      await deleteDoc(doc(db, "userUploads", fileId));
+      setCsvFiles(csvFiles.filter((file) => file.id !== fileId));
+    } catch (e) {
+      console.error("Error deleting document: ", e);
+    }
   };
 
   return (
@@ -284,7 +331,13 @@ const FileUpload = () => {
                             )
                           </p>
                         </div>
-                        <ChevronRight className="text-teal-500 cursor-pointer" />
+                        <div className="flex justify-between flex-col ml-5 space-y-2">
+                          <X
+                            size={20}
+                            className="text-red-500 cursor-pointer"
+                            onClick={() => handleDeleteFile(csvFile.id)}
+                          />
+                        </div>
                       </div>
                     </CardContent>
                   </Card>

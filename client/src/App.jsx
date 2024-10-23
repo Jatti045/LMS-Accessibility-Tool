@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Toaster } from "./components/ui/toaster";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginSignupPage";
 import Homepage from "./pages/Homepage";
-import DocumentListPage from "./pages/DocumentListPage"; // Import the new component
+import DocumentListPage from "./pages/DocumentListPage";
 import { auth } from "./components/firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, clearUser } from "./components/app/features/userSlice";
