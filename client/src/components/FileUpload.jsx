@@ -58,11 +58,12 @@ const FileUpload = () => {
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file && file.type === "text/csv") {
-      setCurrentFileName(file.name);
+      const fileName = file.name;
+      setCurrentFileName(fileName);
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target.result;
-        parseCSV(text);
+        parseCSV(text, fileName);
       };
       reader.readAsText(file);
     } else {
@@ -70,7 +71,7 @@ const FileUpload = () => {
     }
   };
 
-  const parseCSV = (text) => {
+  const parseCSV = (text, fileName) => {
     Papa.parse(text, {
       header: true,
       complete: async (results) => {
@@ -83,7 +84,7 @@ const FileUpload = () => {
           criticalIssues: criticalIssuesCount,
           overallScore: overallScoreCount.toFixed(1),
           date: new Date().toLocaleDateString(),
-          fileName: currentFileName,
+          fileName: fileName,
           userId: user.uid,
         };
 
@@ -166,7 +167,6 @@ const FileUpload = () => {
   };
 
   const handleDeleteFile = async (fileId) => {
-    console.log;
     try {
       await deleteDoc(doc(db, "userUploads", fileId));
       setCsvFiles(csvFiles.filter((file) => file.id !== fileId));
@@ -311,7 +311,7 @@ const FileUpload = () => {
                           <FileText className="text-teal-700" size={24} />
                           <div>
                             <h3 className="font-medium text-teal-900">
-                              {currentFileName.slice(0, 20)}
+                              {csvFile.fileName.slice(0, 20)}
                             </h3>
                             <p className="text-sm text-teal-600 flex items-center">
                               <Calendar size={14} className="mr-1" />
