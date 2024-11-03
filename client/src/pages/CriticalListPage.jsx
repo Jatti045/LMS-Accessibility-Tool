@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-const DocumentListPage = () => {
+const CriticalListPage = () => {
   const location = useLocation();
   const { csvData } = location.state || { csvData: [] };
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,25 +24,12 @@ const DocumentListPage = () => {
   const parseDocumentData = () => {
     if (!Array.isArray(csvData)) return [];
 
-    // Define issue columns for calculating total issues
-    const issueColumns = [
-      "AlternativeText:2",
-      "Contrast:2",
-      "ImageSeizure:1",
-      "LanguageCorrect:3",
-      "LanguagePresence:3",
-      "Ocred:2",
-      "Parsable:1",
-      "Scanned:1",
-      "Security:1",
-      "TableHeaders:2",
-      "Tagged:2",
-      "Title:3",
-    ];
+    // Define critical issue columns
+    const criticalIssueColumns = ["AlternativeText:2", "Contrast:2"];
 
     return csvData
       .map((row) => {
-        const totalIssues = issueColumns.reduce(
+        const criticalIssues = criticalIssueColumns.reduce(
           (sum, column) => sum + (parseInt(row[column], 10) || 0),
           0
         );
@@ -50,11 +37,11 @@ const DocumentListPage = () => {
         return {
           name: row.Name || "Untitled",
           url: row.Url || "#",
-          issues: totalIssues,
+          issues: criticalIssues,
           score: row.Score ? parseFloat(row.Score) * 100 : 0,
         };
       })
-      .filter((doc) => doc.issues > 0);
+      .filter((doc) => doc.issues > 0); // Exclude documents with 0 critical issues
   };
 
   const documents = parseDocumentData().sort((a, b) => b.issues - a.issues);
@@ -77,7 +64,7 @@ const DocumentListPage = () => {
       <div className="max-w-4xl mx-auto p-6 space-y-6">
         <Card className="bg-gradient-to-br from-teal-500 to-teal-600 text-white">
           <CardHeader className="flex flex-row items-center justify-between">
-            <h2 className="text-2xl font-bold">Document Analysis</h2>
+            <h2 className="text-2xl font-bold">Critical Issues Analysis</h2>
             <Link to="/">
               <Button
                 variant="ghost"
@@ -90,7 +77,7 @@ const DocumentListPage = () => {
           </CardHeader>
           <CardContent>
             <p className="text-teal-100">
-              Review and fix accessibility issues in your documents
+              Review and fix critical accessibility issues in your documents
             </p>
           </CardContent>
         </Card>
@@ -98,13 +85,13 @@ const DocumentListPage = () => {
         <Card>
           <CardHeader>
             <h3 className="text-xl font-semibold text-teal-900">
-              Documents requiring attention
+              Documents with Critical Issues
             </h3>
           </CardHeader>
           <CardContent>
             {paginatedDocuments.length === 0 ? (
               <div className="text-center py-8 text-teal-600">
-                No documents found. Please upload a CSV file to begin analysis.
+                No documents found with critical issues.
               </div>
             ) : (
               <div className="space-y-4">
@@ -125,7 +112,7 @@ const DocumentListPage = () => {
                         </div>
                         <div className="text-right mr-4">
                           <p className="text-sm font-medium text-red-600">
-                            {doc.issues} total issues
+                            {doc.issues} critical issues found
                           </p>
                         </div>
                         <div className="flex space-x-2">
@@ -184,4 +171,4 @@ const DocumentListPage = () => {
   );
 };
 
-export default DocumentListPage;
+export default CriticalListPage;

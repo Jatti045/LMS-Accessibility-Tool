@@ -11,7 +11,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { db, auth } from "./firebase"; // Import Firebase config
+import { db, auth } from "./firebase";
 import {
   collection,
   addDoc,
@@ -25,7 +25,8 @@ import {
 const FileUpload = () => {
   const [uploads, setUploads] = useState([]);
   const [csvFiles, setCsvFiles] = useState([]);
-  const [currentFileData, setCurrentFileData] = useState(null);
+  const [parsedCSVData, setParsedCSVData] = useState(null); // New state for full CSV data
+  const [currentFileData, setCurrentFileData] = useState(null); // Summary data
   const [currentFileName, setCurrentFileName] = useState("");
   const userDisplayName = useSelector(
     (state) => state.user.user?.displayName || "User"
@@ -37,7 +38,6 @@ const FileUpload = () => {
     const fetchUploadHistory = async () => {
       if (user) {
         const userId = user.uid;
-
         const q = query(
           collection(db, "userUploads"),
           where("userId", "==", userId)
@@ -88,13 +88,15 @@ const FileUpload = () => {
           userId: user.uid,
         };
 
+        setParsedCSVData(results.data); // Store full parsed CSV data
+        setCurrentFileData(newFileData); // Store summary data
+
         try {
           const docRef = await addDoc(
             collection(db, "userUploads"),
             newFileData
           );
           setCsvFiles([{ id: docRef.id, ...newFileData }, ...csvFiles]);
-          setCurrentFileData(newFileData);
         } catch (e) {
           console.error("Error adding document: ", e);
         }
@@ -154,16 +156,24 @@ const FileUpload = () => {
   };
 
   const handleFixAllIssues = () => {
-    console.log("Fixing all issues...");
-    navigate("/document-list", { state: { csvData: currentFileData } });
+    if (parsedCSVData) {
+      navigate("/document-list", { state: { csvData: parsedCSVData } });
+    } else {
+      console.error("No file data available for navigation.");
+    }
   };
 
   const handleFixCriticalIssues = () => {
-    console.log("Fixing only critical issues...");
+    if (parsedCSVData) {
+      navigate("/critical-list", { state: { csvData: parsedCSVData } });
+    } else {
+      console.error("No file data available for navigation.");
+    }
   };
 
   const handleUploadAnotherFile = () => {
     setCurrentFileData(null);
+    setParsedCSVData(null); // Reset parsed CSV data
   };
 
   const handleDeleteFile = async (fileId) => {
@@ -334,7 +344,7 @@ const FileUpload = () => {
                         <div className="flex justify-between flex-col ml-5 space-y-2">
                           <X
                             size={20}
-                            className="text-red-500 cursor-pointer"
+                            className="text-gray-500 cursor-pointer hover:text-red-500"
                             onClick={() => handleDeleteFile(csvFile.id)}
                           />
                         </div>

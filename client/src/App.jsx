@@ -8,6 +8,7 @@ import { auth } from "./components/firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, clearUser } from "./components/app/features/userSlice";
 import { Loader2 } from "lucide-react";
+import CriticalListPage from "./pages/CriticalListPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -49,6 +50,10 @@ function App() {
         <Route
           path="/document-list"
           element={user ? <DocumentListPage /> : <Homepage />}
+        />
+        <Route
+          path="/critical-list"
+          element={user ? <CriticalListPage /> : <Homepage />}
         />
       </Routes>
     </>
