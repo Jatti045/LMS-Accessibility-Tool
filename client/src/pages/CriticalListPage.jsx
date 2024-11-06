@@ -14,12 +14,14 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const CriticalListPage = () => {
   const location = useLocation();
   const { csvData } = location.state || { csvData: [] };
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const navigate = useNavigate();
 
   const parseDocumentData = () => {
     if (!Array.isArray(csvData)) return [];
@@ -57,6 +59,10 @@ const CriticalListPage = () => {
 
   const handlePreviousPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleFixIssues = (doc) => {
+    navigate("/fix-document", { state: { document: doc } }); // Use navigate with state
   };
 
   return (
@@ -128,6 +134,7 @@ const CriticalListPage = () => {
                           <Button
                             size="sm"
                             className="bg-teal-500 hover:bg-teal-600 text-white"
+                            onClick={() => handleFixIssues(doc)} // Navigate to FixDocumentPage 
                           >
                             <Wrench className="h-4 w-4 mr-1" />
                             Fix Issues

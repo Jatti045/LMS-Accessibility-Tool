@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom"; // Updated import
 import {
   ChevronLeft,
   ChevronRight,
@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 
 const DocumentListPage = () => {
   const location = useLocation();
+  const navigate = useNavigate(); // Use navigate instead of history
   const { csvData } = location.state || { csvData: [] };
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -70,6 +71,10 @@ const DocumentListPage = () => {
 
   const handlePreviousPage = () => {
     if (currentPage > 1) setCurrentPage(currentPage - 1);
+  };
+
+  const handleFixIssues = (doc) => {
+    navigate("/fix-document", { state: { document: doc } }); // Use navigate with state
   };
 
   return (
@@ -141,6 +146,7 @@ const DocumentListPage = () => {
                           <Button
                             size="sm"
                             className="bg-teal-500 hover:bg-teal-600 text-white"
+                            onClick={() => handleFixIssues(doc)} // Navigate to FixDocumentPage
                           >
                             <Wrench className="h-4 w-4 mr-1" />
                             Fix Issues
