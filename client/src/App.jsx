@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginSignupPage";
 import Homepage from "./pages/Homepage";
 import DocumentListPage from "./pages/DocumentListPage";
+import FixDocumentPage from "./pages/FixDocumentPage"; // Correct path for FixDocumentPage
 import { auth } from "./components/firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, clearUser } from "./components/app/features/userSlice";
@@ -54,6 +55,10 @@ function App() {
         <Route
           path="/critical-list"
           element={user ? <CriticalListPage /> : <Homepage />}
+        />
+        <Route
+          path="/fix-document"
+          element={user ? <FixDocumentPage /> : <Homepage />} // Updated Route path for FixDocumentPage
         />
       </Routes>
     </>
