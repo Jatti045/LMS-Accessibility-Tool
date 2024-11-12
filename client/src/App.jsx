@@ -4,12 +4,13 @@ import { Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginSignupPage";
 import Homepage from "./pages/Homepage";
 import DocumentListPage from "./pages/DocumentListPage";
-import FixDocumentPage from "./pages/FixDocumentPage"; // Correct path for FixDocumentPage
+import FixDocumentPage from "./pages/FixDocumentPage";
 import { auth } from "./components/firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, clearUser } from "./components/app/features/userSlice";
 import { Loader2 } from "lucide-react";
 import CriticalListPage from "./pages/CriticalListPage";
+import ChatBot from "./components/ChatBot";
 
 function App() {
   const dispatch = useDispatch();
@@ -58,9 +59,10 @@ function App() {
         />
         <Route
           path="/fix-document"
-          element={user ? <FixDocumentPage /> : <Homepage />} // Updated Route path for FixDocumentPage
+          element={user ? <FixDocumentPage /> : <Homepage />}
         />
       </Routes>
+      <ChatBot />
     </>
   );
 }
