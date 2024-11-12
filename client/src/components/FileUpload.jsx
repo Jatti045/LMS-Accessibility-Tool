@@ -26,7 +26,7 @@ import {
 const FileUpload = () => {
   const [uploads, setUploads] = useState([]);
   const [csvFiles, setCsvFiles] = useState([]);
-  const [parsedCSVData, setParsedCSVData] = useState(null); // New state for full CSV data
+  const [parsedCSVData, setParsedCSVData] = useState(null); // Full CSV data
   const [currentFileData, setCurrentFileData] = useState(null); // Summary data
   const [currentFileName, setCurrentFileName] = useState("");
   const userDisplayName = useSelector(
@@ -49,11 +49,44 @@ const FileUpload = () => {
         querySnapshot.forEach((doc) => {
           uploadList.push({ id: doc.id, ...doc.data() });
         });
+
+        // Update state and save to localStorage
         setCsvFiles(uploadList);
+        localStorage.setItem("csvFiles", JSON.stringify(uploadList));
+
+        // Set the last uploaded file data if available
+        if (uploadList.length > 0) {
+          const lastUpload = uploadList[0];
+          setCurrentFileData({
+            totalIssues: lastUpload.totalIssues,
+            criticalIssues: lastUpload.criticalIssues,
+            overallScore: lastUpload.overallScore,
+            date: lastUpload.date,
+            fileName: lastUpload.fileName,
+          });
+          setCurrentFileName(lastUpload.fileName);
+          setParsedCSVData(JSON.parse(localStorage.getItem("parsedCSVData")));
+        }
       }
     };
 
-    fetchUploadHistory();
+    // Load csvFiles and file data from localStorage on component mount
+    const savedCsvFiles = localStorage.getItem("csvFiles");
+    const savedFileData = localStorage.getItem("currentFileData");
+    const savedParsedData = localStorage.getItem("parsedCSVData");
+    const savedFileName = localStorage.getItem("currentFileName");
+
+    if (savedCsvFiles) {
+      setCsvFiles(JSON.parse(savedCsvFiles));
+    } else {
+      fetchUploadHistory();
+    }
+
+    if (savedFileData && savedParsedData && savedFileName) {
+      setCurrentFileData(JSON.parse(savedFileData));
+      setParsedCSVData(JSON.parse(savedParsedData));
+      setCurrentFileName(savedFileName);
+    }
   }, [user]);
 
   const handleFileUpload = (event) => {
@@ -92,12 +125,24 @@ const FileUpload = () => {
         setParsedCSVData(results.data); // Store full parsed CSV data
         setCurrentFileData(newFileData); // Store summary data
 
+        // Save data to localStorage
+        localStorage.setItem("parsedCSVData", JSON.stringify(results.data));
+        localStorage.setItem("currentFileData", JSON.stringify(newFileData));
+        localStorage.setItem("currentFileName", fileName);
+
         try {
           const docRef = await addDoc(
             collection(db, "userUploads"),
             newFileData
           );
-          setCsvFiles([{ id: docRef.id, ...newFileData }, ...csvFiles]);
+          const updatedCsvFiles = [
+            { id: docRef.id, ...newFileData },
+            ...csvFiles,
+          ];
+          setCsvFiles(updatedCsvFiles);
+
+          // Save updated csvFiles to localStorage
+          localStorage.setItem("csvFiles", JSON.stringify(updatedCsvFiles));
         } catch (e) {
           console.error("Error adding document: ", e);
         }
@@ -174,13 +219,18 @@ const FileUpload = () => {
 
   const handleUploadAnotherFile = () => {
     setCurrentFileData(null);
-    setParsedCSVData(null); // Reset parsed CSV data
+    setParsedCSVData(null);
+    localStorage.removeItem("parsedCSVData");
+    localStorage.removeItem("currentFileData");
+    localStorage.removeItem("currentFileName");
   };
 
   const handleDeleteFile = async (fileId) => {
     try {
       await deleteDoc(doc(db, "userUploads", fileId));
-      setCsvFiles(csvFiles.filter((file) => file.id !== fileId));
+      const updatedCsvFiles = csvFiles.filter((file) => file.id !== fileId);
+      setCsvFiles(updatedCsvFiles);
+      localStorage.setItem("csvFiles", JSON.stringify(updatedCsvFiles));
     } catch (e) {
       console.error("Error deleting document: ", e);
     }
