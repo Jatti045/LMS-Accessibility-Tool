@@ -5,6 +5,7 @@ import LoginPage from "./pages/LoginSignupPage";
 import Homepage from "./pages/Homepage";
 import DocumentListPage from "./pages/DocumentListPage";
 import FixDocumentPage from "./pages/FixDocumentPage";
+import InstructionsPage from "./pages/InstructionsPage";
 import { auth } from "./components/firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser, clearUser } from "./components/app/features/userSlice";
@@ -60,6 +61,10 @@ function App() {
         <Route
           path="/fix-document"
           element={user ? <FixDocumentPage /> : <Homepage />}
+        />
+        <Route path="/" element={<FixDocumentPage />} 
+        />
+        <Route path="/instructions" element={<InstructionsPage />} 
         />
       </Routes>
       <ChatBot />

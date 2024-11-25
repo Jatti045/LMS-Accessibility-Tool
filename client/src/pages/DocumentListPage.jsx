@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useLocation, Link, useNavigate } from "react-router-dom"; // Updated import
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import {
   ChevronLeft,
   ChevronRight,
@@ -18,7 +18,7 @@ import Header from "@/components/Header";
 
 const DocumentListPage = () => {
   const location = useLocation();
-  const navigate = useNavigate(); // Use navigate instead of history
+  const navigate = useNavigate();
   const { csvData } = location.state || { csvData: [] };
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -54,6 +54,7 @@ const DocumentListPage = () => {
           url: row.Url || "#",
           issues: totalIssues,
           score: row.Score ? parseFloat(row.Score) * 100 : 0,
+          originalRow: row, // Keep the original row data
         };
       })
       .filter((doc) => doc.issues > 0);
@@ -75,7 +76,16 @@ const DocumentListPage = () => {
   };
 
   const handleFixIssues = (doc) => {
-    navigate("/fix-document", { state: { document: doc } }); // Use navigate with state
+    // Find the complete row data in the original csvData
+    const selectedFileName = doc.name;
+    
+    navigate("/fix-document", { 
+      state: { 
+        selectedFile: selectedFileName,
+        csvData: csvData,  // Pass the complete CSV data
+        document: doc
+      } 
+    });
   };
 
   return (
@@ -150,7 +160,7 @@ const DocumentListPage = () => {
                             <Button
                               size="sm"
                               className="bg-teal-500 hover:bg-teal-600 text-white"
-                              onClick={() => handleFixIssues(doc)} // Navigate to FixDocumentPage
+                              onClick={() => handleFixIssues(doc)}
                             >
                               <Wrench className="h-4 w-4 mr-1" />
                               Fix Issues
