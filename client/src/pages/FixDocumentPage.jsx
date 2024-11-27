@@ -48,7 +48,7 @@ const FixDocumentPage = () => {
       console.error("No CSV data available");
       return;
     }
-
+  
     const selectedFileRow = csvData.find(
       (row) => row.Name === selectedFileName
     );
@@ -56,20 +56,21 @@ const FixDocumentPage = () => {
       console.error("Selected file not found in CSV data");
       return;
     }
-
+  
     const headers = Object.keys(csvData[0]);
     const relevantHeaders = headers.slice(8);
-
-    let results = "";
-    relevantHeaders.forEach((header, index) => {
-      results += `${header}= ${selectedFileRow[header]}`;
-      if (index < relevantHeaders.length - 1) {
-        results += ", ";
-      }
-    });
-
+  
+    // Filter headers that have a value of 1
+    const accessibilityIssues = relevantHeaders.filter(
+      (header) => selectedFileRow[header] === 1 || selectedFileRow[header] === "1"
+    );
+  
+    let results = accessibilityIssues.join(", ");
+  
     console.log("AllyResults for", selectedFileName, ":", results);
-    setAllyResults(results);
+    
+    // Ensure results is set even if it's an empty string
+    setAllyResults(results || "No accessibility issues detected");
   };
 
   const extractPDFContent = async (file) => {
@@ -167,7 +168,7 @@ const FixDocumentPage = () => {
 
     try {
       // Create the combined prompt with accessibility metrics
-      const combinedPrompt = `Below is the output of Ally's csv file describing which areas of the document have accessibility errors. All the headers are separated by commas (the last header does not have a comma at the end), and the values of each head is after = sign. Use the data to compare with accessibility issues found using https://www.federalregister.gov/documents/2024/04/24/2024-07758/nondiscrimination-on-the-basis-of-disability-accessibility-of-web-information-and-services-of-state." for accessibility guidelines. Give suggestions on where in the document issues are and how to fix them. Only provide suggestions for problems Ally's identified and make sure to include all the issues present. Provide the suggestions in Step by Step instructions list. The format of each issue found should be as follows: The title of each step Should be "Issue", number (starting from 1) and the name of the issue. The title should have # in front of it. Underneath the title, the first subheading will be Description. Subheadings should have ## in front of them. Underneath the Description subheading, provide the description of the issue. Under that have a subheading for Solution, and provide steps to fix the solution underneath the subheading. The steps should assume the user is not tech savvy and guide them through exactly how to fix the issue. The text provided is from a pdf document. Do not provide any instructions using HTML The user does not understand technical jargon. Only provide the requested content and nothing else.
+      const combinedPrompt = `Below is the output of Ally's csv file describing which areas of the document have accessibility errors. All the headers are separated by commas (the last header does not have a comma at the end), and the severity of each header is after ":" (1 being severe, 2 major, 3 minor). Use the data to compare with accessibility issues found using https://www.federalregister.gov/documents/2024/04/24/2024-07758/nondiscrimination-on-the-basis-of-disability-accessibility-of-web-information-and-services-of-state." for accessibility guidelines. Give suggestions on where in the document issues are and how to fix them. Only provide suggestions for problems Ally's identified and make sure to include all the issues present. Provide the suggestions in Step by Step instructions list. The format of each issue found should be as follows: The title of each step Should be "Issue", number (starting from 1) and the name of the issue. The title should have # in front of it. Underneath the title, the first subheading will be Description. Subheadings should have ## in front of them. Underneath the Description subheading, provide the description of the issue. Under that have a subheading for Solution, and provide steps to fix the solution underneath the subheading (do not add any titles in the steps, only step number followed by the instruction). The steps should assume the user is not tech savvy and guide them through exactly how to fix the issue. The text provided is from a pdf document. Do not provide any instructions using HTML The user does not understand technical jargon. Only provide the requested content and nothing else.
 
 ${allyResults}
 

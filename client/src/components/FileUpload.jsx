@@ -3,7 +3,7 @@ import { Upload, FileText, ChevronRight, Calendar, X } from "lucide-react";
 import { useSelector } from "react-redux";
 import Papa from "papaparse";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 import {
   Card,
@@ -254,29 +254,40 @@ const FileUpload = () => {
           <h2 className="text-xl font-semibold text-teal-900">File Upload</h2>
         </CardHeader>
         <CardContent>
-          {!currentFileData ? (
-            <label
-              htmlFor="file-upload"
-              className="flex flex-col items-center justify-center w-full h-64 border-2 border-teal-300 border-dashed rounded-lg cursor-pointer bg-teal-50 hover:bg-teal-100 transition duration-300 ease-in-out"
-            >
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <Upload className="w-12 h-12 text-teal-500 mb-3" />
-                <p className="mb-2 text-sm text-teal-700">
-                  <span className="font-semibold">Click to upload</span> or drag
-                  and drop
-                </p>
-                <p className="text-xs text-teal-600">
-                  CSV files only (MAX. 100MB)
-                </p>
+        {!currentFileData ? (
+            <>
+              <label
+                htmlFor="file-upload"
+                className="flex flex-col items-center justify-center w-full h-64 border-2 border-teal-300 border-dashed rounded-lg cursor-pointer bg-teal-50 hover:bg-teal-100 transition duration-300 ease-in-out"
+              >
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                  <Upload className="w-12 h-12 text-teal-500 mb-3" />
+                  <p className="mb-2 text-sm text-teal-700">
+                    <span className="font-semibold">Click to upload</span> or drag
+                    and drop
+                  </p>
+                  <p className="text-xs text-teal-600">
+                    CSV files only (MAX. 100MB)
+                  </p>
+                </div>
+                <input
+                  id="file-upload"
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  onChange={handleFileUpload}
+                />
+              </label>
+              <div className="text-center mt-4">
+                <Link 
+                  to="https://help.blackboard.com/Ally/Ally_for_LMS/Administrator/Institution_Report/Export#:~:text=You%20can%20export%20Ally%20CSV,%2C%20terms%2C%20and%20years%20reports." 
+                  target="_blank" 
+                  className="text-teal-600 hover:text-teal-800 underline text-sm"
+                >
+                  How to Obtain Ally CSV File?
+                </Link>
               </div>
-              <input
-                id="file-upload"
-                type="file"
-                accept=".csv"
-                className="hidden"
-                onChange={handleFileUpload}
-              />
-            </label>
+            </>
           ) : (
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
